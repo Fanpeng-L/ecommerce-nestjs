@@ -1,13 +1,35 @@
+import { redirect } from "next/navigation";
+import prisma from "../lib/db/prisma";
+
 //Add Product page tab title
 export const metadata = {
   title: "Add Product - Fanmazon",
 };
 
+async function addProduct(formData: FormData) {
+  "use server";
+
+  const name = formData.get("name")?.toString();
+  const description = formData.get("description")?.toString();
+  const imageUrl = formData.get("imageUrl")?.toString();
+  const price = Number(formData.get("price") || 0);
+
+  if (!name || !description || !price || !imageUrl) {
+    throw Error("Missing required fields");
+  }
+
+  await prisma.product.create({
+    data: { name, description, price, imageUrl },
+  });
+
+  redirect("/");
+}
+
 export default function AddProductPage() {
   return (
     <div>
       <h1 className="mb-3 text-lg font-bold">Add product</h1>
-      <form action="">
+      <form action={addProduct}>
         <input
           required
           name="name"
